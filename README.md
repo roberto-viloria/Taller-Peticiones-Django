@@ -95,15 +95,19 @@ CRUD describe las operaciones básicas sobre datos:
   `django.views.View`. Sus métodos `get()`, `post()`, `put()` y `delete()`
   procesan cada método HTTP. `json.loads()` interpreta los cuerpos JSON y
   `django.http.JsonResponse` genera las respuestas JSON.
+- POST y PUT ejecutan `full_clean()` sobre el modelo antes de guardar. Si el
+  JSON está mal formado, faltan campos requeridos o sus valores no pasan la
+  validación del modelo, la API responde `400` en lugar de guardar el producto.
 - `method_decorator()` aplica `csrf_exempt` a `dispatch` para permitir las
   peticiones de escritura del ejercicio sin token CSRF. Esta exención, junto
   con la ausencia de autenticación y autorización en la API, es solo apropiada
   para la práctica local; no se debe desplegar así en producción.
 - `productos/models.py` define el modelo `Producto` con
   `django.db.models.Model` y los campos `CharField`, `TextField`,
-  `DecimalField` y `PositiveIntegerField`. El ORM usa `objects.all()`,
-  `objects.create()` y `objects.get()` para consultar y persistir datos; `save()`
-  actualiza y `delete()` elimina registros.
+  `DecimalField` y `PositiveIntegerField`. La validación de modelo se realiza
+  con `full_clean()`. El ORM usa `objects.all()` y `objects.get()` para consultar
+  datos; el modelo se instancia y se persiste con `save()`, y `delete()` elimina
+  registros.
 - `productos/admin.py` registra `Producto` con `django.contrib.admin` para
   gestionarlo desde la interfaz de administración en `/admin/` (requiere una
   cuenta de superusuario).

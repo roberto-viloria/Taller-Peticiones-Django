@@ -1,6 +1,7 @@
 
 import json
 
+from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
@@ -32,19 +33,21 @@ class ProductoView(View):
         try:
             datos = json.loads(request.body)
 
-            producto = Producto.objects.create(
+            producto = Producto(
                 nombre=datos['nombre'],
                 descripcion=datos['descripcion'],
                 precio=datos['precio'],
                 stock=datos['stock']
             )
+            producto.full_clean()
+            producto.save()
 
             return JsonResponse({
                 'mensaje': 'Producto creado correctamente',
                 'id': producto.id
             }, status=201)
 
-        except (ValueError, KeyError, TypeError):
+        except (ValueError, KeyError, TypeError, ValidationError):
             return JsonResponse({
                 'error': 'Datos incorrectos o incompletos'
             }, status=400)
@@ -60,6 +63,7 @@ class ProductoView(View):
             producto.precio = datos['precio']
             producto.stock = datos['stock']
 
+            producto.full_clean()
             producto.save()
 
             return JsonResponse({
@@ -71,7 +75,7 @@ class ProductoView(View):
                 'error': 'Producto no encontrado'
             }, status=404)
 
-        except (ValueError, KeyError, TypeError):
+        except (ValueError, KeyError, TypeError, ValidationError):
             return JsonResponse({
                 'error': 'Datos incorrectos o incompletos'
             }, status=400)
